@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#232019">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="修行录">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<title>每日修行录 · 文字RPG打卡</title>
+<style>
+:root{
+  --paper:#f7f2e8; --card:#fffdf7; --ink:#232019; --ink2:#6b6255; --ink3:#9a9083;
+  --line:#e3d9c6; --line2:#c9bda3; --zhu:#9e2f27; --gold:#a8801f; --jade:#4a7a63; --blue:#3f5c7a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  background-image:linear-gradient(180deg,#f9f5ec 0%,#f2ebdd 100%);
+  color:var(--ink);
+  font-family:"Songti SC","STSong","SimSun","Noto Serif SC","Source Han Serif SC",serif;
+  font-size:15px;line-height:1.7;
+  min-height:100vh;
+}
+.app{max-width:680px;margin:0 auto;padding:16px 14px calc(56px + env(safe-area-inset-bottom))}
+
+/* 顶部 */
+.hero{
+  border:1px solid var(--line2);background:var(--card);
+  padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  box-shadow:0 2px 0 rgba(0,0,0,.03);
+}
+.hero-main{display:flex;align-items:center;gap:12px;min-width:0}
+.avatar{
+  width:46px;height:46px;flex:0 0 46px;border:1px solid var(--line2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;color:var(--paper);background:var(--ink);letter-spacing:0;
+}
+.hero h1{margin:0;font-size:20px;font-weight:600;letter-spacing:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hero .rank{margin:1px 0 0;font-size:13px;color:var(--ink2);letter-spacing:1px}
+.hero .rank .lv{color:var(--zhu);font-weight:600}
+.goldbox{text-align:right;white-space:nowrap;font-size:12px;color:var(--ink2);letter-spacing:1px}
+.goldbox b{display:block;font-size:20px;color:var(--gold);font-weight:600;line-height:1.2}
+
+/* 标签页 */
+.tabs{
+  display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line2);border-top:0;
+  background:#fbf7ee;position:sticky;top:0;z-index:20;
+}
+.tabs button{
+  font-family:inherit;font-size:14px;letter-spacing:1px;padding:12px 2px;
+  border:0;border-right:1px solid var(--line);background:transparent;color:var(--ink2);cursor:pointer;
+}
+.tabs button:last-child{border-right:0}
+.tabs button.on{background:var(--card);color:var(--zhu);font-weight:600;box-shadow:inset 0 -2px 0 var(--zhu)}
+.tabpane{display:none}
+.tabpane.on{display:block}
+
+/* 卡片 */
+.card{background:var(--card);border:1px solid var(--line2);border-top:0;padding:14px 16px}
+.card-title{
+  font-size:15px;letter-spacing:3px;font-weight:600;margin:0 0 10px;
+  padding-left:10px;border-left:3px solid var(--zhu);line-height:1.3;
+}
+.card-title em{font-style:normal;font-size:12px;letter-spacing:0;color:var(--ink3);font-weight:400;margin-left:6px}
+.hint{font-size:12px;color:var(--ink3);line-height:1.6;margin:8px 0 0}
+
+/* 经验条 */
+.expbar{height:10px;border:1px solid var(--line2);background:#f0e9da;overflow:hidden}
+.expbar i{display:block;height:100%;background:linear-gradient(90deg,#9e2f27,#c2543f);transition:width .35s ease}
+.exptext{display:flex;justify-content:space-between;font-size:12px;color:var(--ink2);margin-top:5px}
+.exptext b{color:var(--ink)}
+
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;text-align:center}
+.grid4>div{border:1px solid var(--line);padding:6px 2px;background:#fdfaf2}
+.grid4 span{display:block;font-size:11px;color:var(--ink3);letter-spacing:1px}
+.grid4 b{font-size:17px;font-weight:600}
+.grid4 b.hl{color:var(--zhu)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.grid3>div{border:1px solid var(--line);padding:6px 2px;background:#fdfaf2}
+.grid3 span{display:block;font-size:11px;color:var(--ink3)}
+.grid3 b{font-size:17px;font-weight:600}
+
+/* 属性 */
+.attr{margin-bottom:12px}
+.attr:last-child{margin-bottom:0}
+.attr-top{display:flex;align-items:baseline;gap:8px}
+.attr-top .k{font-size:15px;letter-spacing:2px;font-weight:600}
+.attr-top .v{margin-left:auto;font-size:16px;font-weight:600}
+.attr-top .g{font-size:11px;color:var(--jade)}
+.plus{
+  font-family:inherit;width:26px;height:26px;line-height:1;border:1px solid var(--line2);
+  background:#fdfaf2;color:var(--zhu);font-size:16px;cursor:pointer;padding:0;flex:0 0 26px;
+}
+.plus:hover{background:var(--zhu);color:#fff;border-color:var(--zhu)}
+.plus.off{color:var(--ink3);border-color:var(--line);background:#f6f2e8;cursor:not-allowed}
+.plus.off:hover{background:#f6f2e8;color:var(--ink3)}
+.attr .bar{height:6px;border:1px solid var(--line);background:#f0e9da;margin:5px 0 3px;overflow:hidden}
+.attr .bar i{display:block;height:100%;background:var(--ink2);transition:width .35s ease}
+.attr .note{font-size:11px;color:var(--ink3);line-height:1.5}
+
+/* Buff */
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{border:1px solid var(--line2);background:#fdfaf2;padding:3px 9px;font-size:12px;letter-spacing:1px}
+.tag.gold{border-color:var(--gold);color:var(--gold)}
+.tag.jade{border-color:var(--jade);color:var(--jade)}
+.tag.zhu{border-color:var(--zhu);color:var(--zhu)}
+.tag.blue{border-color:var(--blue);color:var(--blue)}
+.tag.gray{border-color:var(--line2);color:var(--ink3)}
+
+/* 表单 */
+.form{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input[type=text],select{
+  font-family:inherit;font-size:16px;padding:9px 10px;border:1px solid var(--line2);
+  background:#fffef9;color:var(--ink);outline:none;min-height:40px;
+}
+input[type=text]{flex:1 1 180px;min-width:0}
+input[type=text]:focus,select:focus{border-color:var(--zhu)}
+select{padding:8px 6px}
+.btn{
+  font-family:inherit;font-size:14px;letter-spacing:2px;padding:9px 16px;min-height:38px;cursor:pointer;
+  border:1px solid var(--ink);background:var(--ink);color:var(--paper);
+}
+.btn:hover{background:#3b362e}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line2)}
+.btn.ghost:hover{background:#f2ebdd}
+.btn.zhu{background:var(--zhu);border-color:var(--zhu);color:#fff}
+.btn.zhu:hover{background:#82231c}
+.btn.sm{padding:5px 11px;font-size:12px;letter-spacing:1px}
+.btn.danger{background:transparent;border-color:#c9a9a4;color:var(--zhu)}
+.btn.danger:hover{background:#fbf1ef}
+
+/* 任务列表 */
+.task{border:1px solid var(--line);background:#fdfaf2;padding:10px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+.task:last-child{margin-bottom:0}
+.task .body{flex:1;min-width:0}
+.task .nm{font-size:15px;word-break:break-all}
+.task .meta{margin-top:5px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:11px;color:var(--ink3)}
+.task .acts{display:flex;flex-direction:column;gap:6px;flex:0 0 auto}
+.task.done{opacity:.62;background:#f7f3ea}
+.task.done .nm{text-decoration:line-through;text-decoration-color:var(--ink3)}
+.empty{text-align:center;color:var(--ink3);font-size:13px;padding:16px 0;letter-spacing:1px}
+.sec-sub{font-size:13px;letter-spacing:2px;color:var(--ink2);margin:16px 0 8px;padding-left:9px;border-left:2px solid var(--line2)}
+
+/* 随机任务 */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font-family:inherit;font-size:13px;letter-spacing:1px;padding:6px 14px;cursor:pointer;
+  border:1px solid var(--line2);background:#fdfaf2;color:var(--ink2);
+}
+.chip.on{border-color:var(--zhu);color:var(--zhu);background:#fbf0ee;font-weight:600}
+.drawbox{text-align:center;padding:6px 0 2px}
+.drawbtn{
+  font-family:inherit;font-size:16px;letter-spacing:5px;padding:12px 28px;cursor:pointer;
+  border:1px solid var(--zhu);background:var(--zhu);color:#fff;
+}
+.drawbtn:hover{background:#82231c}
+.result{margin-top:14px;border:1px solid var(--zhu);background:#fdf6f4;padding:14px;text-align:center;animation:fade .3s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.result .rname{font-size:19px;font-weight:600;letter-spacing:1px;margin:6px 0 10px}
+.result .rmeta{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.result .rreward{font-size:13px;color:var(--ink2);letter-spacing:1px}
+.result .ract{display:flex;justify-content:center;gap:8px;margin-top:12px;flex-wrap:wrap}
+
+/* 商城 */
+.shopgroup{margin-bottom:6px}
+.shoptitle{font-size:13px;letter-spacing:3px;color:var(--ink2);margin:14px 0 8px;padding-left:9px;border-left:2px solid var(--gold)}
+.shoptitle:first-child{margin-top:0}
+.item{border:1px solid var(--line);background:#fdfaf2;padding:10px 12px;margin-bottom:8px;display:flex;gap:10px;align-items:center}
+.item .ib{flex:1;min-width:0}
+.item .in{font-size:15px;font-weight:600;letter-spacing:1px}
+.item .in em{font-style:normal;font-weight:400;font-size:12px;color:var(--gold);margin-left:8px}
+.item .id{font-size:12px;color:var(--ink2);margin-top:3px;line-height:1.6}
+.item.owned{background:#f4f7f4;border-color:#cddfd4}
+.price{font-size:14px;font-weight:600;color:var(--gold);white-space:nowrap}
+
+/* 提示 */
+#toast{position:fixed;left:0;right:0;bottom:24px;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;z-index:99}
+.toast{
+  background:rgba(35,32,25,.94);color:#f7f2e8;font-size:14px;letter-spacing:1px;
+  padding:9px 18px;border-radius:2px;animation:up .28s ease;max-width:88vw;text-align:center;
+}
+.toast.gold{border-left:3px solid var(--gold)}
+.toast.zhu{border-left:3px solid #e0705f}
+.toast.level{background:var(--zhu);font-size:15px;font-weight:600;animation:pop .45s ease}
+@keyframes up{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.86)}60%{transform:scale(1.04)}100%{opacity:1;transform:scale(1)}}
+/* 弹窗 */
+.mask{
+  position:fixed;inset:0;background:rgba(25,22,18,.5);display:none;
+  align-items:center;justify-content:center;z-index:120;padding:20px;
+}
+.mask.on{display:flex}
+.modal{
+  background:var(--card);border:1px solid var(--line2);max-width:380px;width:100%;
+  max-height:80vh;display:flex;flex-direction:column;animation:fade .22s ease;
+}
+.modal h3{margin:0;padding:12px 16px;font-size:15px;letter-spacing:3px;border-bottom:1px solid var(--line)}
+.modal .mb{padding:14px 16px;overflow:auto;font-size:14px;line-height:1.75;color:var(--ink2)}
+.modal .mf{padding:10px 16px 14px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--line)}
+.rankrow{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.rankrow:last-child{border-bottom:0}
+.rankrow .rn{letter-spacing:2px;color:var(--ink)}
+.rankrow .rl{font-size:12px;color:var(--ink3);white-space:nowrap}
+.rankrow.cur{color:var(--zhu)}
+.rankrow.cur .rn{color:var(--zhu);font-weight:600}
+.rankrow.cur .rl::after{content:' · 当前';color:var(--zhu)}
+.clickable{cursor:pointer;border-bottom:1px dashed var(--line2)}
+.clickable:hover{color:var(--zhu)}
+.danger-text{color:var(--zhu);font-weight:600}
+@media(max-width:400px){
+  .tabs button{font-size:13px;letter-spacing:0}
+  .grid4 b,.grid3 b{font-size:15px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="hero">
+    <div class="hero-main">
+      <div class="avatar" id="avatar">修</div>
+      <div style="min-width:0">
+        <h1 id="heroName" class="clickable" title="点击前往改名">无名学子</h1>
+        <p class="rank"><span id="heroRank" class="clickable" title="点击查看境界谱">初出茅庐</span> · <span class="lv" id="heroLevel">Lv.1</span> · <span id="heroSex">男</span> · <span id="heroAge">18岁</span></p>
+      </div>
+    </div>
+    <div class="goldbox">金币<b id="heroGold">0</b></div>
+  </header>
+
+  <nav class="tabs">
+    <button data-tab="panel" class="on">角色面板</button>
+    <button data-tab="task">任务管理</button>
+    <button data-tab="random">随机任务</button>
+    <button data-tab="shop">金币商城</button>
+  </nav>
+
+  <main>
+    <!-- 角色面板 -->
+    <section class="tabpane on" id="tab-panel">
+      <div class="card">
+        <h2 class="card-title">境界进度</h2>
+        <div class="expbar"><i id="expFill" style="width:0%"></i></div>
+        <div class="exptext">
+          <span>当前境界 EXP <b id="expNow">0</b> / <b id="expNeed">100</b></span>
+          <span>距下一境 <b id="expLeft">100</b></span>
+        </div>
+        <div class="grid4">
+          <div><span>等级</span><b id="stLevel">1</b></div>
+          <div><span>总EXP</span><b id="stTotal">0</b></div>
+          <div><span>升级所需</span><b id="stNeed">100</b></div>
+          <div><span>自由属性点</span><b id="stFree" class="hl">2</b></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">命数与寿元</h2>
+        <div class="grid4">
+          <div><span>性别</span><b id="stSex">男</b></div>
+          <div><span>年龄</span><b id="stAge">18</b></div>
+          <div><span>寿元</span><b id="stLife">20</b></div>
+          <div><span>剩余寿元</span><b id="stLeft" class="hl">2</b></div>
+        </div>
+        <p class="hint" id="lifeHint">生辰 2008-04-15；初始寿元 20 年，每晋升一级寿元 +1 年。</p>
+        <div style="margin-top:10px"><button class="btn ghost sm" id="btnRanks">查看境界谱</button></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">五维属性<em id="freeTip">点击「＋」分配自由属性点</em></h2>
+        <div id="attrList"></div>
+        <p class="hint">基准：5.00 = 普通成年男性平均水平；10 = 出众；20 = 凡人极限（单项上限）。每升一级获 2 点自由属性点（1 点 = 属性值 +1.00），日常任务只带来微量自然增长。</p>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">已持 buff<em>仅叙事与心理暗示，无数值加成</em></h2>
+        <div class="tags" id="buffList"></div>
+        <p class="hint">buff 自购买起计时，到期自动消散；持有期间再次购买可续期。</p>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">修行战绩</h2>
+        <div class="grid3">
+          <div><span>累计完成</span><b id="stDone">0</b></div>
+          <div><span>今日打卡</span><b id="stToday">0</b></div>
+          <div><span>连续天数</span><b id="stStreak">0</b></div>
+        </div>
+        <p class="hint">每日完成任意任务即计入连续打卡，中断则从 1 重新起算。</p>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">名号与存档</h2>
+        <div class="form">
+          <input type="text" id="nameInput" maxlength="12" placeholder="给自己取个名号">
+          <button class="btn ghost" id="btnRename">改换名号</button>
+          <button class="btn ghost" id="btnInstall">添加到桌面</button>
+          <button class="btn danger" id="btnReset">重置存档</button>
+        </div>
+        <p class="hint">全部数据保存在本机浏览器 localStorage 中，刷新、关闭页面均不会丢失；清理浏览器数据或更换设备会导致存档消失。手机端可点「添加到桌面」，像 App 一样独立打开。</p>
+      </div>
+    </section>
+
+    <!-- 任务管理 -->
+    <section class="tabpane" id="tab-task">
+      <div class="card">
+        <h2 class="card-title">添加自定义任务</h2>
+        <div class="form">
+          <input type="text" id="ctName" maxlength="40" placeholder="任务名称，如：复习线性代数第二章">
+          <select id="ctAttr"></select>
+          <select id="ctDiff">
+            <option value="easy">简单</option>
+            <option value="normal" selected>普通</option>
+            <option value="hard">困难</option>
+          </select>
+          <button class="btn zhu" id="btnAdd">立下任务</button>
+        </div>
+        <p class="hint">难度报酬：简单 EXP+10 / 金币+10；普通 EXP+25 / 金币+25；困难 EXP+60 / 金币+60。属性按现实效应折算微量自然增长：简单 +0.02、普通 +0.04、困难 +0.08（力量、敏捷训练另附体质 +50%）。</p>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">待完成任务<em id="todoCount">0 项</em></h2>
+        <div id="todoList"></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">已完成<em id="doneCount">0 项</em></h2>
+        <div id="doneList"></div>
+      </div>
+    </section>
+
+    <!-- 随机任务 -->
+    <section class="tabpane" id="tab-random">
+      <div class="card">
+        <h2 class="card-title">抽取随机任务</h2>
+        <div class="chips" id="attrChips"></div>
+        <div class="drawbox">
+          <button class="drawbtn" id="btnDraw">天 机 一 抽</button>
+        </div>
+        <div id="drawResult"></div>
+        <p class="hint"><span id="poolInfo"></span>抽取时会回避最近抽过的 16 条任务，尽量避免短时间重复。抽中后可立即打卡，或先收入任务清单稍后再做。魅力类任务以自然、礼貌、尊重对方为前提。</p>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">当前任务清单<em id="randTodo">0 项</em></h2>
+        <div id="randList"></div>
+      </div>
+    </section>
+
+    <!-- 金币商城 -->
+    <section class="tabpane" id="tab-shop">
+      <div class="card">
+        <h2 class="card-title">坊市 · buff 铺</h2>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;color:var(--ink2);letter-spacing:1px">囊中金币</span>
+          <span class="price" style="font-size:20px" id="shopGold">0</span>
+        </div>
+        <p class="hint">buff 仅为文字叙事与心理暗示，不改变任何属性、EXP 与奖励计算，购买后永久陈列于角色面板，可同时持有多个。</p>
+      </div>
+      <div class="card" id="shopBody"></div>
+    </section>
+  </main>
+</div>
+
+<div class="mask" id="modal">
+  <div class="modal">
+    <h3 id="mTitle">提示</h3>
+    <div class="mb" id="mBody"></div>
+    <div class="mf">
+      <button class="btn ghost sm" id="mCancel">取消</button>
+      <button class="btn zhu sm" id="mOk">确定</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============ 基础配置 ============ */
+const KEY = 'daka_rpg_save_v1';
+const BASE_ATTR = 5;        // 普通成年男性平均水平
+const MAX_ATTR  = 20;       // 单项属性极限（凡人之巅）
+const POINTS_PER_LEVEL = 2; // 每升一级可分配的自由属性点
+const BIRTH = '2008-04-15'; // 宿主生辰
+const SEX = '男';           // 宿主性别
+const LIFE_BASE = 20;       // 初始寿元（年），每升一级 +1
+
+const ATTRS = [
+  {k:'str', n:'力量', note:'肉身爆发力与体魄上限 · 健身力量训练', cls:'zhu'},
+  {k:'agi', n:'敏捷', note:'身体灵活度与行动效率 · 跑步跳绳等运动', cls:'jade'},
+  {k:'con', n:'体质', note:'耐力与身体恢复能力 · 作息饮食、健康休养', cls:'gold'},
+  {k:'spr', n:'精神', note:'专注力、记忆力、意志力 · 刷题、代码、阅读', cls:'blue'},
+  {k:'cha', n:'魅力', note:'表达能力与人际气场 · 社交、沟通、当众发言（自然得体、尊重他人）', cls:'gray'}
+];
+const ATTR_MAP = {};
+ATTRS.forEach(a => ATTR_MAP[a.k] = a);
+
+/* 任务对属性的实际增益（自然增长，按现实效应折算）
+   简单 ≈ 十几分钟的单次小练习；普通 ≈ 一小时的常规训练；困难 ≈ 高强度/持续数日的硬仗
+   一次训练对身体的真实改变极小，故以 0.0x 计量，长年累月方见差距 */
+const DIFFS = {
+  easy:   {n:'简单', exp:10, gold:10, gain:0.02},
+  normal: {n:'普通', exp:25, gold:25, gain:0.04},
+  hard:   {n:'困难', exp:60, gold:60, gain:0.08}
+};
+/* 附带效应：力量/敏捷训练同时小幅改善耐力与恢复（体质） */
+const SIDE_GAIN = {str:{con:0.5}, agi:{con:0.5}};
+
+const RANKS = [[90,'登峰造极'],[70,'卓尔不群'],[50,'出类拔萃'],[40,'登堂入室'],[30,'一方翘楚'],
+               [20,'声名鹊起'],[15,'锋芒毕露'],[10,'略有小成'],[5,'崭露头角'],[1,'初出茅庐']];
+
+const POOL_RAW = {
+  str:{easy:['标准俯卧撑12个','徒手深蹲30个','臀桥20次','靠墙静蹲60秒','跪姿俯卧撑15个',
+             '平板支撑30秒','提踵（踮脚尖）30次','书包/水瓶弯举左右各15次','椅子臂屈伸12次','毛巾或弹力带划船20次'],
+       normal:['标准俯卧撑25个','引体向上6次','哑铃弯举左右各15次','箭步蹲左右各12次','深蹲跳15次',
+               '平板支撑90秒','下斜俯卧撑（脚垫高）20个','单腿深蹲左右各8次','卷腹与反向卷腹各20次','水瓶肩推左右各12次'],
+       hard:['标准俯卧撑40个','引体向上12次','负重深蹲30次','倒立撑练习3组','硬拉训练15次',
+             '平板支撑3分钟','负重箭步蹲左右各15次','哑铃/杠铃卧推4组','俯卧撑累计100个（分组完成）','深蹲与硬拉超级组各4组']},
+  agi:{easy:['跳绳200下','高抬腿持续1分钟','开合跳1分钟','原地小碎步2分钟',
+             '楼梯上下往返3趟','左右滑步侧向移动1分钟','转体扭腰跳1分钟','关节活动与动态热身5分钟','原地小跳接快速变向30秒×3组'],
+       normal:['慢跑20分钟','跳绳500下','登山跑2分钟','折返跑8组',
+               '快走与慢跑交替15分钟','骑行20分钟','球类运动30分钟（篮球/羽毛球/足球）','跳绳双摇50下','高抬腿与后踢腿各1分钟×3组'],
+       hard:['间歇冲刺跑10组','跳绳1000下','波比跳15个','30分钟有氧慢跑',
+             '5公里长跑','HIIT训练20分钟','变向折返冲刺15分钟','连续跳绳3组各300下','400米×6组间歇跑']},
+  con:{easy:['今日饮水1800ml','全身拉伸8分钟','饭后散步15分钟',
+             '今晚23点前放下手机，不熬夜刷视频','三餐按时吃，不空腹上课','课间远眺放松眼睛5分钟','热水泡脚或热水澡15分钟','今日不吃第二份零食与夜宵'],
+       normal:['23:30前上床睡觉，保证7小时以上睡眠','全天不吃油炸、奶茶甜品','户外晒太阳15分钟','三餐按时，不吃宵夜',
+               '午休20分钟','全天饮水2000ml','久坐每小时起身活动3分钟','每餐后站立或慢走20分钟','今日蔬菜水果各一份，荤素搭配'],
+       hard:['连续3天23点前入睡','每日饮水2500ml，坚持一整天','30分钟舒缓有氧+全身深度拉伸','戒掉零食，健康饮食一整天',
+             '连续3天不喝含糖饮料','连续一周23:30前上床','连续3天7点前起床并完成晨间拉伸','一整天零外卖零油炸，自己搭配三餐','连续3天午休+睡前拉伸，规律作息']},
+  spr:{easy:['专注学习40分钟，全程不碰手机','背诵英语单词35个','整理一节课课堂笔记','阅读专业教材25分钟',
+             '复盘今天做错的一道题目','读完一篇技术/科普长文并做3条笔记','手写笔记或练字10分钟','番茄钟完成2个专注时段','整理桌面与资料，5分钟进入状态'],
+       normal:['高数习题练习1小时','C语言编程练习50分钟','英文阅读精读30分钟','复盘今日学习内容，写简短总结','文献泛读1篇',
+               '整理本周错题本1小时','英语听力练习30分钟','刷10道专业课习题并订正','预习明天的课并列出3个疑问','用思维导图梳理一章知识结构'],
+       hard:['连续2小时专注学习，无手机干扰','完成一套高数章节习题','独立完成一个C语言小项目','阅读专业文献并撰写摘要','备考刷题2小时',
+             '一天内完成一个小项目（写代码+调试+写说明）','啃完一章英文原版教材并做笔记','连续5天每天专注学习2小时','完成一套真题/模拟卷并全面订正','输出一篇学习总结长文或技术博客']},
+  cha:{easy:['主动和同学打招呼、简单寒暄','真诚夸奖身边一位同学（自然不油腻）','打理个人仪表：头发清爽、衣着整洁再出门','认真听完别人完整的一段话，不打断',
+             '礼貌地向一位女同学点头打招呼','上课坐前排一次，抬头看老师','一次对话中放慢语速、抬头挺胸','主动给同学递纸巾/借文具/顺手帮个小忙'],
+       normal:['小组讨论主动发言一次，表达个人观点','礼貌向老师或学长请教一个专业问题','主动帮同学或室友一个小忙（带饭、占座、搬东西）','练习3分钟自我介绍，声音洪亮、站姿端正',
+               '主动与一位女同学自然交流（借笔记、讨论作业、确认课程安排）','在食堂或社团活动中与不太熟的同学搭话3分钟','与女同学组队完成一次小组任务或实验','主动邀请同学一起去图书馆自习或吃饭','记住一位新认识同学的名字并在下次准确叫出'],
+       hard:['在班级/小组当众做简短汇报','主动组织一次小组讨论、完成小组作业分工','在球场或社团活动中主动搭话，认识一位新朋友','上台回答老师提出的课堂问题',
+             '邀请一位女同学一起讨论课题或复习，保持自然交流10分钟以上','当众向老师提问，并复述自己的理解','礼貌地向一位欣赏的同学（异性）表达继续交流的意愿（对方方便且不打扰为前提）','组织一次小型聚会或活动，负责联络与串场','课堂展示后主动收集反馈并向同学致谢']}
+};
+const POOL = [];
+Object.keys(POOL_RAW).forEach(a => Object.keys(POOL_RAW[a]).forEach(d => {
+  POOL_RAW[a][d].forEach((nm,i) => POOL.push({id:a+'_'+d+'_'+i, name:nm, attr:a, diff:d}));
+}));
+
+/* days = 持续天数（自购买起计时，到期自动消散） */
+const SHOP = [
+  {id:'m1',cat:'精神',name:'静心冥想',price:30,days:3,desc:'心神沉静，杂念消散，接下来的学习更容易进入专注状态。'},
+  {id:'m2',cat:'精神',name:'求知慧眼',price:50,days:5,desc:'目光澄澈，晦涩知识点更容易读懂，难题思路慢慢浮现。'},
+  {id:'m3',cat:'精神',name:'坚韧意志',price:80,days:7,desc:'意志力小幅提升，面对枯燥刷题、写代码时不容易半途而废。'},
+  {id:'m4',cat:'精神',name:'破局之心',price:120,days:10,desc:'卡壳多时的难题，或许下一刻就能找到突破口。'},
+  {id:'s1',cat:'力量',name:'肉身蓄力',price:30,days:3,desc:'肌肉蓄满力量，训练时耐力更强，动作更标准。'},
+  {id:'s2',cat:'力量',name:'不屈体魄',price:50,days:5,desc:'疲惫感被压制，健身时可以坚持多一组训练。'},
+  {id:'s3',cat:'力量',name:'猛虎之势',price:100,days:7,desc:'爆发力提升，挑战高强度训练时更有底气。'},
+  {id:'a1',cat:'敏捷',name:'如风之息',price:30,days:3,desc:'身体轻盈，运动时节奏顺畅，动作更加协调。'},
+  {id:'a2',cat:'敏捷',name:'迅捷反应',price:60,days:5,desc:'反应速度提升，行动做事干脆利落，不拖沓。'},
+  {id:'c1',cat:'体质',name:'生机回复',price:30,days:3,desc:'身体恢复加速，疲劳缓慢消散，睡眠质量更佳。'},
+  {id:'c2',cat:'体质',name:'自愈微光',price:70,days:7,desc:'身体正在慢慢调养，小酸痛、疲惫会更快消退。'},
+  {id:'h1',cat:'魅力',name:'从容气场',price:40,days:3,desc:'心态平稳，与人交流时自信从容，表达自然。'},
+  {id:'h2',cat:'魅力',name:'善言光环',price:75,days:7,desc:'沟通更加顺畅，更容易理解他人，表达想法更清晰。'}
+];
+const SHOP_MAP = {}; SHOP.forEach(s => SHOP_MAP[s.id] = s);
+const CAT_CLS = {'精神':'blue','力量':'zhu','敏捷':'jade','体质':'gold','魅力':'gray'};
+
+/* ============ 状态 ============ */
+function defaultState(){
+  return {
+    name:'无名学子', level:1, exp:0, totalExp:0, gold:0, free:POINTS_PER_LEVEL, birth:BIRTH, sex:SEX,
+    alloc:{str:0,agi:0,con:0,spr:0,cha:0},
+    growth:{str:0,agi:0,con:0,spr:0,cha:0},
+    tasks:[], buffs:[], recent:[],
+    stats:{done:0, today:0, lastDay:'', streak:0}
+  };
+}
+let state = load();
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return defaultState();
+    const s = JSON.parse(raw);
+    const d = defaultState();
+    const merged = Object.assign(d, s);
+    merged.alloc  = Object.assign(d.alloc,  s.alloc  || {});
+    merged.growth = Object.assign(d.growth, s.growth || {});
+    merged.stats  = Object.assign(d.stats,  s.stats  || {});
+    if(!Array.isArray(merged.tasks))  merged.tasks = [];
+    if(!Array.isArray(merged.buffs))  merged.buffs = [];
+    if(!Array.isArray(merged.recent)) merged.recent = [];
+    // 旧档 buff 为 id 字符串，转换为带到期时间的对象
+    merged.buffs = merged.buffs.map(b => {
+      if(typeof b === 'string'){ const it = SHOP_MAP[b]; return {id:b, until:Date.now() + (it ? it.days : 7)*86400000}; }
+      return (b && b.id) ? b : null;
+    }).filter(Boolean);
+    purgeBuffs(merged);
+    // 数值体系调整：旧档属性收敛到新的上限内
+    ATTRS.forEach(a => {
+      merged.alloc[a.k]  = Math.max(0, Math.min(merged.alloc[a.k] || 0, MAX_ATTR - BASE_ATTR));
+      merged.growth[a.k] = r4(Math.max(0, Math.min(merged.growth[a.k] || 0, MAX_ATTR - BASE_ATTR - merged.alloc[a.k])));
+    });
+    return merged;
+  }catch(e){ return defaultState(); }
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }
+  catch(e){ toast('存档写入失败，浏览器可能禁用了本地存储'); }
+}
+
+/* ============ 工具 ============ */
+const $ = id => document.getElementById(id);
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function needExp(lv){ return Math.round(100 * Math.pow(1.18, lv-1)); }
+function rankOf(lv){ for(const r of RANKS){ if(lv >= r[0]) return r[1]; } return '初出茅庐'; }
+function attrVal(k){ return BASE_ATTR + (state.alloc[k]||0) + (state.growth[k]||0); }
+function fmt(v){ return (Math.round(v*100)/100).toFixed(2); }
+function r4(v){ return Math.round(v*10000)/10000; }
+/* 自然增长：受单项上限约束，返回实际生效值 */
+function growthAdd(k, amount){
+  const room = Math.max(0, MAX_ATTR - BASE_ATTR - (state.alloc[k]||0));
+  const before = state.growth[k] || 0;
+  state.growth[k] = r4(Math.min(Math.max(0, before + amount), room));
+  return r4(state.growth[k] - before);
+}
+/* buff 时效 */
+function purgeBuffs(s){
+  s = s || state;
+  const n = s.buffs.length;
+  s.buffs = s.buffs.filter(b => b && b.until && b.until > Date.now());
+  return n - s.buffs.length;
+}
+function buffLeftDays(b){ return Math.max(0, Math.ceil((b.until - Date.now())/86400000)); }
+function findBuff(id){ return state.buffs.filter(b => b.id === id)[0]; }
+function dayKey(d){ d = d || new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function uid(){ return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function ageOf(birth){
+  const p = String(birth||BIRTH).split('-').map(Number);
+  const n = new Date();
+  let a = n.getFullYear() - p[0];
+  const cm = n.getMonth()+1, cd = n.getDate();
+  if(cm < p[1] || (cm === p[1] && cd < p[2])) a--;
+  return Math.max(0, a);
+}
+function lifeSpan(){ return LIFE_BASE + (state.level - 1); }          // 每升一级寿元 +1
+function lifeLeft(){ return lifeSpan() - ageOf(state.birth); }        // 剩余寿元
+
+/* 自定义弹窗（替代 confirm，避免内嵌预览中对话框被拦截） */
+let modalCb = null;
+function openModal(title, bodyHtml, okText, cancelText, cb){
+  $('mTitle').textContent = title;
+  $('mBody').innerHTML = bodyHtml;
+  modalCb = cb || null;
+  $('mOk').textContent = okText || '确定';
+  if(cancelText){ $('mCancel').style.display = ''; $('mCancel').textContent = cancelText; }
+  else { $('mCancel').style.display = 'none'; }
+  $('modal').classList.add('on');
+}
+function closeModal(){ $('modal').classList.remove('on'); modalCb = null; }
+function confirmBox(title, msg, cb){
+  openModal(title, '<div style="color:var(--ink)">'+msg+'</div>', '确定', '取消', cb);
+}
+function showRanks(){
+  const lv = state.level;
+  const rows = RANKS.slice().sort((a,b) => b[0]-a[0]).map(r => {
+    const next = RANKS.filter(x => x[0] > r[0]).sort((a,b) => a[0]-b[0])[0];
+    const range = next ? ('Lv.'+r[0]+' ~ '+(next[0]-1)) : ('Lv.'+r[0]+' 及以上');
+    return '<div class="rankrow'+(lv >= r[0] && (!next || lv < next[0]) ? ' cur' : '')+'">'
+      + '<span class="rn">'+r[1]+'</span><span class="rl">'+range+'</span></div>';
+  }).join('');
+  openModal('境界谱', rows + '<div style="margin-top:10px;font-size:12px;color:var(--ink3)">共计 '+RANKS.length+' 重境界，当前 Lv.'+lv+'（'+rankOf(lv)+'），每升一级寿元 +1 年。</div>', '收起', '');
+}
+
+function toast(msg, type){
+  const box = $('toast');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' '+type : '');
+  el.innerHTML = msg;
+  box.appendChild(el);
+  setTimeout(()=>{el.style.transition='opacity .4s';el.style.opacity='0';setTimeout(()=>el.remove(),420);}, 2400);
+}
+
+/* ============ 核心逻辑 ============ */
+function addExp(amount){
+  state.exp += amount; state.totalExp += amount;
+  let up = 0;
+  while(state.exp >= needExp(state.level)){
+    state.exp -= needExp(state.level);
+    state.level++; state.free += POINTS_PER_LEVEL; up++;
+  }
+  if(up > 0){
+    toast('突破！晋入 <b>Lv.'+state.level+'</b>　「'+rankOf(state.level)+'」　寿元 +'+up+' 年，自由属性点 +'+(up*POINTS_PER_LEVEL), 'level');
+  }
+  return up;
+}
+
+function completeTask(id){
+  const t = state.tasks.find(x => x.id === id);
+  if(!t || t.done) return;
+  const d = DIFFS[t.diff];
+  t.done = true; t.doneAt = Date.now();
+
+  state.gold += d.gold;
+  const gains = {};
+  const main = growthAdd(t.attr, d.gain);
+  gains[t.attr] = main;
+  let sideTxt = '';
+  const side = SIDE_GAIN[t.attr];
+  if(side){
+    Object.keys(side).forEach(sk => {
+      const got = growthAdd(sk, d.gain * side[sk]);
+      if(got > 0){
+        gains[sk] = r4((gains[sk]||0) + got);
+        sideTxt += '　' + ATTR_MAP[sk].n + ' +' + fmt(got);
+      }
+    });
+  }
+  t.got = gains;
+  addExp(d.exp);
+
+  state.stats.done++;
+  const today = dayKey();
+  if(state.stats.lastDay !== today){
+    const yest = dayKey(new Date(Date.now()-86400000));
+    state.stats.streak = (state.stats.lastDay === yest) ? state.stats.streak + 1 : 1;
+    state.stats.lastDay = today;
+    state.stats.today = 1;
+  }else{
+    state.stats.today++;
+  }
+  save();
+  toast('任务达成：<b>'+esc(t.name)+'</b><br>EXP +'+d.exp+'　金币 +'+d.gold
+        + '　' + ATTR_MAP[t.attr].n + ' +' + fmt(main) + sideTxt, 'gold');
+  renderAll();
+}
+
+function addAttr(k){
+  if(state.free <= 0) return;
+  if(attrVal(k) + 1 > MAX_ATTR){ toast(ATTR_MAP[k].n + '已至凡人极限（' + MAX_ATTR.toFixed(2) + '）'); return; }
+  state.free--; state.alloc[k] = (state.alloc[k]||0) + 1;
+  save(); renderAll();
+}
+
+function drawRandom(attr){
+  let pool = POOL.filter(t => attr === 'all' || t.attr === attr);
+  let cand = pool.filter(t => state.recent.indexOf(t.id) === -1);
+  if(!cand.length) cand = pool;
+  const t = cand[Math.floor(Math.random()*cand.length)];
+  state.recent.push(t.id);
+  if(state.recent.length > 16) state.recent.shift();
+  save();
+  return t;
+}
+
+/* ============ 渲染 ============ */
+function renderHero(){
+  $('heroName').textContent = state.name || '无名学子';
+  $('heroRank').textContent = rankOf(state.level);
+  $('heroLevel').textContent = 'Lv.' + state.level;
+  $('heroGold').textContent = state.gold;
+  $('heroSex').textContent = state.sex || SEX;
+  $('heroAge').textContent = ageOf(state.birth) + '岁';
+  $('avatar').textContent = (state.name || '修').trim().slice(0,1) || '修';
+}
+
+function renderPanel(){
+  const need = needExp(state.level);
+  $('expFill').style.width = Math.min(100, state.exp/need*100) + '%';
+  $('expNow').textContent = state.exp;
+  $('expNeed').textContent = need;
+  $('expLeft').textContent = Math.max(0, need - state.exp);
+  $('stLevel').textContent = state.level;
+  $('stTotal').textContent = state.totalExp;
+  $('stNeed').textContent = need;
+  $('stFree').textContent = state.free;
+  $('freeTip').textContent = state.free > 0 ? ('剩余 ' + state.free + ' 点可分配') : '暂无可分配属性点';
+
+  const age = ageOf(state.birth), life = lifeSpan(), left = lifeLeft();
+  $('stSex').textContent = state.sex || SEX;
+  $('stAge').textContent = age;
+  $('stLife').textContent = life;
+  $('stLeft').textContent = left;
+  $('stLeft').className = left <= 0 ? 'danger-text' : (left <= 3 ? 'hl' : '');
+  $('lifeHint').innerHTML = '生辰 ' + (state.birth || BIRTH) + '　·　寿元 ' + life + ' 年（剩余 '
+    + (left > 0 ? '<b style="color:var(--zhu)">' + left + '</b> 年' : '<b style="color:var(--zhu)">寿元将尽</b>')
+    + '）　·　每晋升一级寿元 +1 年';
+
+  $('attrList').innerHTML = ATTRS.map(a => {
+    const v = attrVal(a.k), g = state.growth[a.k]||0, al = state.alloc[a.k]||0;
+    const full = v + 1 > MAX_ATTR;
+    return '<div class="attr">'
+      + '<div class="attr-top"><span class="k">'+a.n+'</span>'
+      + '<span class="g">'+(g>0?('历练 +'+fmt(g)):'')+(al>0?('　加点 +'+al):'')+'</span>'
+      + '<span class="v">'+fmt(v)+'</span>'
+      + '<button class="plus'+((state.free>0 && !full)?'':' off')+'" data-add="'+a.k+'" title="分配 1 点">+</button></div>'
+      + '<div class="bar"><i style="width:'+Math.min(100, v/MAX_ATTR*100)+'%"></i></div>'
+      + '<div class="note">'+a.note+'　·　上限 '+MAX_ATTR.toFixed(2)+'</div></div>';
+  }).join('');
+
+  if(purgeBuffs() > 0) save();
+  $('buffList').innerHTML = state.buffs.length
+    ? state.buffs.slice().sort((a,b) => a.until - b.until).map(b => {
+        const it = SHOP_MAP[b.id];
+        return it ? '<span class="tag '+CAT_CLS[it.cat]+'">'+esc(it.name)+' · 剩 '+buffLeftDays(b)+' 天</span>' : '';
+      }).join('')
+    : '<span class="empty" style="padding:0">尚无 buff，可往坊市一观</span>';
+
+  const today = dayKey();
+  $('stDone').textContent = state.stats.done;
+  $('stToday').textContent = state.stats.lastDay === today ? state.stats.today : 0;
+  $('stStreak').textContent = state.stats.lastDay === today ? state.stats.streak
+                            : (state.stats.lastDay === dayKey(new Date(Date.now()-86400000)) ? state.stats.streak : 0);
+  $('nameInput').value = state.name;
+}
+
+function rewardText(t){
+  const d = DIFFS[t.diff], a = ATTR_MAP[t.attr];
+  let s = 'EXP +'+d.exp+'　金币 +'+d.gold+'　'+a.n+' +'+fmt(d.gain);
+  const side = SIDE_GAIN[t.attr];
+  if(side){
+    Object.keys(side).forEach(sk => { s += '　' + ATTR_MAP[sk].n + ' +' + fmt(d.gain*side[sk]); });
+  }
+  return s;
+}
+function taskHTML(t){
+  const d = DIFFS[t.diff], a = ATTR_MAP[t.attr];
+  return '<div class="task'+(t.done?' done':'')+'">'
+    + '<div class="body"><div class="nm">'+esc(t.name)+'</div>'
+    + '<div class="meta"><span class="tag '+a.cls+'">'+a.n+'</span>'
+    + '<span class="tag '+(t.diff==='hard'?'zhu':(t.diff==='normal'?'gray':''))+'">'+d.n+'</span>'
+    + '<span>'+rewardText(t)+'</span>'
+    + '<span>'+(t.type==='random'?'随机':'自定义')+'</span></div></div>'
+    + '<div class="acts">'
+    + (t.done
+        ? '<button class="btn ghost sm" data-undo="'+t.id+'">撤销</button><button class="btn danger sm" data-del="'+t.id+'">删除</button>'
+        : '<button class="btn zhu sm" data-done="'+t.id+'">完成</button><button class="btn danger sm" data-del="'+t.id+'">删除</button>')
+    + '</div></div>';
+}
+
+function renderTasks(){
+  const todo = state.tasks.filter(t => !t.done);
+  const done = state.tasks.filter(t => t.done).sort((a,b) => (b.doneAt||0)-(a.doneAt||0)).slice(0,20);
+  $('todoCount').textContent = todo.length + ' 项';
+  $('doneCount').textContent = state.tasks.filter(t=>t.done).length + ' 项';
+  $('todoList').innerHTML = todo.length ? todo.map(taskHTML).join('')
+    : '<div class="empty">暂无待办，去随机任务抽一签</div>';
+  $('doneList').innerHTML = done.length ? done.map(taskHTML).join('')
+    : '<div class="empty">尚无完成记录</div>';
+}
+
+let curAttr = 'all';
+let curDraw = null;
+
+function renderChips(){
+  $('attrChips').innerHTML = '<button class="chip'+(curAttr==='all'?' on':'')+'" data-attr="all">全属性</button>'
+    + ATTRS.map(a => '<button class="chip'+(curAttr===a.k?' on':'')+'" data-attr="'+a.k+'">'+a.n+'</button>').join('');
+  const n = POOL.filter(t => curAttr === 'all' || t.attr === curAttr).length;
+  $('poolInfo').textContent = '当前范围任务池共 ' + n + ' 条（' + (curAttr==='all'?'全属性':ATTR_MAP[curAttr].n) + '）。';
+}
+
+function renderDraw(){
+  if(!curDraw){ $('drawResult').innerHTML = ''; return; }
+  const d = DIFFS[curDraw.diff], a = ATTR_MAP[curDraw.attr];
+  $('drawResult').innerHTML =
+    '<div class="result"><div class="rmeta">'
+    + '<span class="tag '+a.cls+'">'+a.n+'</span>'
+    + '<span class="tag '+(curDraw.diff==='hard'?'zhu':(curDraw.diff==='normal'?'gray':''))+'">'+d.n+'</span></div>'
+    + '<div class="rname">'+esc(curDraw.name)+'</div>'
+    + '<div class="rreward">报酬预览：'+rewardText(curDraw)+'</div>'
+    + '<div class="ract"><button class="btn zhu" data-finish="1">立即完成打卡</button>'
+    + '<button class="btn ghost" data-keep="1">收入任务清单</button></div></div>';
+}
+
+function renderRandList(){
+  const todo = state.tasks.filter(t => !t.done);
+  $('randTodo').textContent = todo.length + ' 项';
+  $('randList').innerHTML = todo.length ? todo.map(taskHTML).join('') : '<div class="empty">清单为空</div>';
+}
+
+function renderShop(){
+  $('shopGold').textContent = state.gold;
+  let html = '';
+  ['精神','力量','敏捷','体质','魅力'].forEach(cat => {
+    html += '<div class="shopgroup"><div class="shoptitle">'+cat+'类</div>';
+    SHOP.filter(s => s.cat === cat).forEach(s => {
+      const b = findBuff(s.id);
+      html += '<div class="item'+(b?' owned':'')+'"><div class="ib">'
+        + '<div class="in">'+esc(s.name)+'<em>'+s.price+' 金币</em>'
+        + '<em style="color:var(--ink3)">持续 '+s.days+' 天</em></div>'
+        + '<div class="id">'+esc(s.desc)+'</div>'
+        + (b ? '<div class="id" style="color:var(--jade)">持有中，剩 '+buffLeftDays(b)+' 天</div>' : '')
+        + '</div>'
+        + (state.gold < s.price
+            ? '<button class="btn sm" disabled style="opacity:.45;cursor:not-allowed">购买</button>'
+            : '<button class="btn sm" data-buy="'+s.id+'">'+(b?'续期':'购买')+'</button>')
+        + '</div>';
+    });
+    html += '</div>';
+  });
+  $('shopBody').innerHTML = html;
+}
+
+function renderAll(){ renderHero(); renderPanel(); renderTasks(); renderRandList(); renderShop(); }
+
+/* ============ 事件 ============ */
+document.querySelector('.tabs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.remove('on'));
+  b.classList.add('on');
+  document.querySelectorAll('.tabpane').forEach(p => p.classList.remove('on'));
+  $('tab-' + b.dataset.tab).classList.add('on');
+});
+
+document.addEventListener('click', e => {
+  const el = e.target;
+
+  const cp = el.closest('[data-copy]');
+  if(cp){ copyUrl(); return; }
+
+  const add = el.closest('[data-add]');
+  if(add){ addAttr(add.dataset.add); return; }
+
+  const done = el.closest('[data-done]');
+  if(done){ completeTask(done.dataset.done); return; }
+
+  const undo = el.closest('[data-undo]');
+  if(undo){
+    const t = state.tasks.find(x => x.id === undo.dataset.undo);
+    if(!t){ return; }
+    confirmBox('撤销完成', '撤销后「'+esc(t.name)+'」所获的 EXP、金币与属性增益将被扣除，等级若因此不足也会回落。<br><br>确定撤销？', () => {
+      const d = DIFFS[t.diff];
+      const got = t.got || {};
+      got[t.attr] = (got[t.attr] != null ? got[t.attr] : d.gain);
+      t.done = false; delete t.doneAt; delete t.got;
+      state.gold = Math.max(0, state.gold - d.gold);
+      Object.keys(got).forEach(k => {
+        state.growth[k] = r4(Math.max(0, (state.growth[k]||0) - got[k]));
+      });
+      state.totalExp = Math.max(0, state.totalExp - d.exp);
+      state.exp -= d.exp;
+      while(state.exp < 0){
+        state.level = Math.max(1, state.level - 1);
+        state.free = Math.max(0, state.free - POINTS_PER_LEVEL);
+        state.exp += needExp(state.level);
+      }
+      state.stats.done = Math.max(0, state.stats.done - 1);
+      state.stats.today = Math.max(0, state.stats.today - 1);
+      save(); renderAll(); toast('已撤销该任务的奖励');
+    });
+    return;
+  }
+
+  const del = el.closest('[data-del]');
+  if(del){
+    const t = state.tasks.find(x => x.id === del.dataset.del);
+    confirmBox('删除任务', '确定删除「'+esc(t ? t.name : '')+'」？删除后不可恢复。', () => {
+      state.tasks = state.tasks.filter(x => x.id !== del.dataset.del);
+      save(); renderAll(); toast('任务已删除');
+    });
+    return;
+  }
+
+  const chip = el.closest('[data-attr]');
+  if(chip){ curAttr = chip.dataset.attr; renderChips(); return; }
+
+  const buy = el.closest('[data-buy]');
+  if(buy){
+    const it = SHOP_MAP[buy.dataset.buy];
+    if(!it) return;
+    if(state.gold < it.price){ toast('金币不足，还差 '+(it.price - state.gold)+' 枚'); return; }
+    const b = findBuff(it.id);
+    state.gold -= it.price;
+    if(b){ b.until = b.until + it.days*86400000; }
+    else { state.buffs.push({id:it.id, until:Date.now() + it.days*86400000}); }
+    save(); renderAll();
+    toast((b?'续期':'购得')+' buff「<b>'+esc(it.name)+'</b>」，时效 '+it.days+' 天', 'gold');
+    return;
+  }
+
+  const fin = el.closest('[data-finish]');
+  if(fin && curDraw){
+    const t = {id:uid(), name:curDraw.name, attr:curDraw.attr, diff:curDraw.diff, type:'random', done:false};
+    state.tasks.push(t); save();
+    curDraw = null; renderDraw();
+    completeTask(t.id);
+    return;
+  }
+
+  const keep = el.closest('[data-keep]');
+  if(keep && curDraw){
+    state.tasks.push({id:uid(), name:curDraw.name, attr:curDraw.attr, diff:curDraw.diff, type:'random', done:false});
+    save(); curDraw = null; renderDraw(); renderAll();
+    toast('已收入任务清单，可前往「任务管理」完成');
+    return;
+  }
+});
+
+$('btnDraw').addEventListener('click', () => {
+  curDraw = drawRandom(curAttr);
+  renderDraw();
+});
+
+$('btnAdd').addEventListener('click', () => {
+  const nm = $('ctName').value.trim();
+  if(!nm){ toast('请先写下任务名称'); $('ctName').focus(); return; }
+  state.tasks.push({id:uid(), name:nm, attr:$('ctAttr').value, diff:$('ctDiff').value, type:'custom', done:false});
+  $('ctName').value = '';
+  save(); renderAll();
+  toast('任务已立：<b>'+esc(nm)+'</b>');
+});
+$('ctName').addEventListener('keydown', e => { if(e.key === 'Enter') $('btnAdd').click(); });
+
+$('btnRename').addEventListener('click', () => {
+  const v = $('nameInput').value.trim();
+  if(!v){ toast('名号不可为空'); return; }
+  state.name = v; save(); renderAll(); toast('名号已改为「'+esc(v)+'」');
+});
+
+$('heroRank').addEventListener('click', showRanks);
+$('btnRanks').addEventListener('click', showRanks);
+$('heroName').addEventListener('click', () => {
+  document.querySelector('.tabs button[data-tab="panel"]').click();
+  $('nameInput').focus(); $('nameInput').select();
+});
+
+$('mOk').addEventListener('click', () => { const cb = modalCb; closeModal(); if(cb) cb(); });
+$('mCancel').addEventListener('click', closeModal);
+$('modal').addEventListener('click', e => { if(e.target === $('modal')) closeModal(); });
+
+$('btnReset').addEventListener('click', () => {
+  confirmBox('重置存档', '重置后等级、EXP、属性、金币、任务与 buff 将全部清空，且不可恢复。<br><br>确定重置？', () => {
+    state = defaultState(); save(); curDraw = null; renderDraw(); renderAll();
+    toast('前尘散尽，重头修起');
+  });
+});
+
+/* ============ 移动端：PWA / 添加到桌面 ============ */
+/* 图标与 manifest 为静态文件（icon-*.png、manifest.json）；
+   通过 http/https 访问时注册 sw.js 实现离线可用与「安装应用」 */
+function registerSW(){
+  try{
+    if(!('serviceWorker' in navigator)) return;
+    if(location.protocol !== 'http:' && location.protocol !== 'https:') return;
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }catch(e){}
+}
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferredPrompt = e;
+  $('btnInstall').textContent = '安装到桌面';
+});
+function copyUrl(){
+  const u = location.href;
+  const ok = () => toast('地址已复制，可粘贴到 Chrome / Safari 打开');
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(u).then(ok, () => fallbackCopy(u));
+      return;
+    }
+  }catch(e){}
+  fallbackCopy(u);
+}
+function fallbackCopy(u){
+  const ta = document.createElement('textarea');
+  ta.value = u; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  let done = false;
+  try{ done = document.execCommand('copy'); }catch(e){}
+  ta.remove();
+  if(done) toast('地址已复制，可粘贴到 Chrome / Safari 打开');
+  else openModal('手动复制', '<div style="word-break:break-all;color:var(--ink)">' + esc(u) + '</div>', '知道了', '');
+}
+function isStandalone(){
+  try{ return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; }
+  catch(e){ return false; }
+}
+$('btnInstall').addEventListener('click', () => {
+  if(deferredPrompt){ const p = deferredPrompt; deferredPrompt = null; p.prompt(); return; }
+  const ua = navigator.userAgent || '';
+  const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const inApp = /MicroMessenger|QQ\/|Weibo|DingTalk|Alipay|UCBrowser|baiduboxapp|quark|douban/i.test(ua);
+  let steps;
+  if(isStandalone()){
+    steps = '<b>已经在桌面模式中运行</b><br>你现在打开的就是桌面图标的独立窗口，无需再添加；它与原网页共用同一份存档。';
+  }else if(inApp){
+    steps = '<b>当前是 App 内置浏览器（微信 / QQ 等）</b><br>这类浏览器没有「添加到桌面」功能：<br>'
+          + '1. 点右上角 <b>⋯</b> 或底部 <b>⋯</b><br>2. 选「<b>在浏览器中打开</b>」<br>3. 选择 Chrome / 系统浏览器<br>4. 再用该浏览器的菜单添加到桌面';
+  }else if(ios){
+    steps = '<b>iPhone / iPad（须用 Safari）</b><br>菜单不在右上角，而在 <b>屏幕底部中间的「分享」按钮</b>（方框带上箭头）：<br>'
+          + '1. 用 Safari 打开本页<br>2. 点底部 <b>分享</b><br>3. 下滑找到「<b>添加到主屏幕</b>」<br>4. 右上角「添加」即可';
+  }else{
+    const xiaomi = /MiBrowser|XiaoMi|Redmi|MI /i.test(ua);
+    steps = '<b>Android</b><br>菜单位置因浏览器而异：<br>'
+          + '· <b>Chrome</b>：右上角 ⋮（部分新版在右下角）→「添加到主屏幕 / 安装应用」<br>'
+          + '· <b>Edge</b>：底部 ⋯ →「添加到手机」<br>'
+          + '· <b>华为 / 小米 / OPPO / vivo / 三星自带浏览器</b>：底部菜单栏的 <b>三横 或 ⋯</b> →「添加到桌面 / 添加到主屏幕」<br>'
+          + (xiaomi ? '<br><b>红米 / 小米自带浏览器：选项发灰怎么办</b><br>'
+              + '1. 退出<b>无痕 / 隐私模式</b>，用普通窗口打开<br>'
+              + '2. 桌面若已有本页图标，先<b>删掉旧图标</b>再添加<br>'
+              + '3. 不要用微信/QQ 打开：到手机「<b>文件管理</b>」长按 index.html → 其他应用打开 → <b>Chrome</b><br>'
+              + '4. 仍不行：桌面长按空白 → 添加快捷方式 / 小部件 → 浏览器<b>书签</b>，选本页'
+              : '· 实在找不到：把地址复制后粘贴到 Chrome 打开，再点右上角 ⋮');
+  }
+  openModal('添加到桌面', '<div style="color:var(--ink)">' + steps + '</div>'
+    + '<div style="margin-top:12px"><button class="btn ghost sm" data-copy="1">复制本页地址</button></div>'
+    + '<p style="margin:10px 0 0;font-size:12px;color:var(--ink3);line-height:1.7">'
+    + '手机端需先把 index.html 传到手机（微信、网盘、数据线），用系统浏览器打开后再添加。桌面图标与原网页共用同一份本地存档（同一浏览器内）。</p>',
+    '知道了', '');
+});
+
+/* ============ 初始化 ============ */
+registerSW();
+$('ctAttr').innerHTML = ATTRS.map(a => '<option value="'+a.k+'">'+a.n+'</option>').join('');
+renderChips();
+renderAll();
+</script>
+</body>
+</html>
